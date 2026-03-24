@@ -1,0 +1,276 @@
+---
+title: "Module 5: GitHub for Scientific Teams"
+subtitle: "Issues, READMEs, Releases, DOIs, Pages, and Licensing"
+author: "NIEHS Training"
+date: "`r Sys.Date()`"
+output:
+  html_document:
+    theme: flatly
+    toc: true
+    toc_float: true
+    toc_depth: 3
+    number_sections: true
+    code_folding: show
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, message = FALSE, warning = FALSE)
+```
+
+# GitHub Issues: Your Research To-Do List
+
+Issues track bugs, tasks, ideas, and discussion — all linked to your code.
+
+## What makes Issues powerful
+
+- **Linked to code:** Reference issues in commits and PRs
+- **Assignable:** Assign tasks to specific team members
+- **Labeled:** Categorize by type (bug, enhancement, question)
+- **Searchable:** Full-text search across all issues
+- **Closeable:** Mark as done when resolved
+
+## Creating an Issue
+
+On GitHub: **Repo → Issues tab → New issue**
+
+A good issue includes:
+
+- **Clear title:** "Figure 2 colors not colorblind-friendly"
+- **Description:** What's wrong, what's expected, how to reproduce
+- **Labels:** bug, enhancement, documentation, etc.
+- **Assignee:** Who should work on this?
+
+## Closing Issues with Commits
+
+Use keywords in commit messages to auto-close issues:
+
+```bash
+git commit -m "Fix colorblind palette for Figure 2, closes #11"
+```
+
+Keywords that work: `closes`, `fixes`, `resolves` (plus their variants:
+`close`, `fix`, `resolve`, `closed`, `fixed`, `resolved`)
+
+The issue closes automatically when the commit is merged to main.
+
+## Useful Labels
+
+| Label | Description | Color suggestion |
+|-------|-------------|-----------------|
+| `bug` | Something isn't working | Red |
+| `enhancement` | New feature or analysis | Blue |
+| `documentation` | Docs, README, methods | Green |
+| `question` | Discussion or decision needed | Purple |
+| `good first issue` | Simple task for new contributors | Violet |
+| `help wanted` | Extra attention needed | Teal |
+| `priority: high` | Needs immediate attention | Dark red |
+
+
+# README.md: Your Project's Front Page
+
+GitHub renders `README.md` as the landing page. A good README answers:
+**what is this project, how do I use it, and who made it?**
+
+## Template
+
+````markdown
+# PFAS Dose-Response Analysis
+
+Analysis of PFAS biomonitoring data from the RTP cohort.
+
+## Overview
+
+This project examines dose-response relationships between
+serum PFAS concentrations and metabolic outcomes in 482
+participants from the Research Triangle Park area.
+
+## Getting Started
+
+1. Clone the repo: `git clone https://github.com/...`
+2. Install dependencies: `renv::restore()`
+3. Run the full analysis: `source("R/00_run_all.R")`
+
+## Project Structure
+
+```
+R/              Analysis scripts (numbered in order)
+data/raw/       Original data files (not tracked in Git)
+data/processed/ Cleaned datasets
+output/figures/ Generated figures
+output/tables/  Generated tables
+```
+
+## Authors
+
+- Jane Smith, Ph.D. — Biostatistics Branch, NIEHS
+- John Doe, Ph.D. — Epidemiology Branch, NIEHS
+
+## License
+
+MIT License — see LICENSE file for details.
+````
+
+
+# Organizing a Scientific Repository
+
+A consistent project structure makes your work navigable for collaborators
+and reviewers.
+
+```
+my-project/
+├── R/
+│   ├── 01_clean.R          # Data cleaning
+│   ├── 02_analyze.R        # Statistical analysis
+│   └── 03_visualize.R      # Figures and tables
+├── data/
+│   ├── raw/                # Original data (often gitignored)
+│   └── processed/          # Cleaned data
+├── output/
+│   ├── figures/            # Generated plots
+│   └── tables/             # Generated tables
+├── docs/                   # Documentation, manuscripts
+├── .gitignore              # Files to exclude
+├── README.md               # Project description
+├── LICENSE                 # How others can use your code
+└── my-project.Rproj        # RStudio project file
+```
+
+**Key principles:**
+
+- **Number your scripts** — `01_`, `02_` prefixes make the analysis order clear
+- **Separate raw from processed** — never modify raw data files
+- **Use an R Project (.Rproj)** — keeps paths relative and portable
+- **Include a README** — future you (and reviewers) will thank you
+
+
+# GitHub Projects: Visual Task Management
+
+GitHub Projects provides a **Kanban board** view of your issues — like Trello,
+but integrated with your code.
+
+```
+┌──────────┐  ┌──────────┐  ┌──────────┐  ┌──────────┐
+│  To Do   │  │In Progress│  │In Review │  │   Done   │
+├──────────┤  ├──────────┤  ├──────────┤  ├──────────┤
+│ Issue #5 │  │ Issue #3 │  │  PR #8   │  │ Issue #1 │
+│ Issue #6 │  │ Issue #7 │  │          │  │ Issue #2 │
+│ Issue #9 │  │          │  │          │  │ Issue #4 │
+└──────────┘  └──────────┘  └──────────┘  └──────────┘
+```
+
+**Setup:** Repo → Projects tab → New project → Board view
+
+Issues can be dragged between columns. PRs linked to issues auto-move to
+"Done" when merged.
+
+
+# Releases & Tags: Marking Milestones
+
+Tags mark specific commits. Releases bundle a tag with notes and downloads.
+
+## Creating a tag and release
+
+```bash
+# Create an annotated tag
+git tag -a v1.0 -m "Version submitted to EHP"
+git push origin v1.0
+```
+
+Then on GitHub: **Repo → Releases → Draft a new release → Choose tag `v1.0`**
+
+## When to create releases
+
+| Milestone | Tag | Notes |
+|-----------|-----|-------|
+| Manuscript submission | `v1.0` | Exact code that produced submitted results |
+| Manuscript revision | `v2.0` | Updated analysis per reviewer comments |
+| Data freeze | `v0.9-data-freeze` | Point when data cleaning was finalized |
+| Conference presentation | `v1.0-asc2025` | Code behind your poster or talk |
+
+
+# Zenodo + GitHub = Citable Code
+
+[Zenodo](https://zenodo.org) (by CERN) archives your GitHub releases and
+assigns a **DOI** — making your code citable in publications.
+
+## Setup (one-time, 5 minutes)
+
+1. Go to [zenodo.org](https://zenodo.org) and log in with your GitHub account
+2. Go to Settings → GitHub → flip the toggle **ON** for your repository
+3. Create a **Release** on GitHub (as described above)
+4. Zenodo automatically archives it and assigns a DOI
+5. Add the DOI badge to your README:
+
+```markdown
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.XXXXXXX.svg)](https://doi.org/10.5281/zenodo.XXXXXXX)
+```
+
+> **Many journals now require a DOI for code and data.** Zenodo + GitHub makes
+> this a 5-minute task, not a bureaucratic ordeal.
+
+
+# Forking: Contributing to Others' Projects
+
+A **fork** is your personal copy of someone else's repository. You can modify
+it freely without affecting the original.
+
+## Fork workflow
+
+1. Click **"Fork"** on someone's GitHub repository
+2. **Clone YOUR fork** to Posit Cloud
+3. Create a branch and make changes
+4. Push to YOUR fork
+5. Open a **Pull Request from your fork** to the original repo
+6. The maintainer reviews and merges (or requests changes)
+
+**Useful for:** contributing to open-source R packages, building on a
+collaborator's published analysis, adapting someone's methods for your data.
+
+
+# GitHub Pages: Free Project Websites
+
+GitHub Pages turns a repository into a website — perfect for project
+documentation, supplementary materials, and lab pages.
+
+## Setup
+
+1. Repo → Settings → Pages → Source: "Deploy from a branch" → main → `/docs`
+2. Add HTML or Markdown files to the `/docs` folder
+3. Commit and push — your site goes live at `username.github.io/repo-name`
+
+**R Markdown tip:** Knit your report to HTML, save in `/docs`, push to GitHub,
+and you have an instant supplementary methods page that anyone can view.
+
+
+# Licensing Your Code
+
+Without a license, your code is **"all rights reserved"** by default — others
+legally cannot reuse it, even if it's on a public GitHub repo.
+
+```{r license-table, echo=FALSE}
+licenses <- data.frame(
+  License = c("MIT License", "GPL-3.0", "CC-BY-4.0", "No license"),
+  Meaning = c("Do anything, just keep the copyright notice",
+              "Derivatives must also be open source",
+              "For non-code content (docs, data); requires attribution",
+              "All rights reserved — no reuse allowed"),
+  Note = c("Most permissive, widely used",
+           "'Copyleft' — ensures code stays open",
+           "Good for datasets and documentation",
+           "Avoid this for reproducible science!")
+)
+knitr::kable(licenses) |>
+  kableExtra::kable_styling(bootstrap_options = c("striped", "hover"),
+                            full_width = FALSE)
+```
+
+**To add:** Create a `LICENSE` file in your repo, or select one when creating
+the repo on GitHub.
+
+> **Check with your NIEHS tech transfer office** about policies for
+> government-funded code. Many NIH-funded projects use public domain or MIT
+> licensing.
+
+---
+
+**Next up → `06_best_practices.Rmd`**

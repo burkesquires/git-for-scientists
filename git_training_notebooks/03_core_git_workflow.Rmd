@@ -1,0 +1,426 @@
+---
+title: "Module 3: The Core Git Workflow"
+subtitle: "Edit → Stage → Commit → Push"
+author: "NIEHS Training"
+date: "`r Sys.Date()`"
+output:
+  html_document:
+    theme: flatly
+    toc: true
+    toc_float: true
+    toc_depth: 3
+    number_sections: true
+    code_folding: show
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, message = FALSE, warning = FALSE)
+```
+
+# The Git Cycle
+
+Every interaction with Git follows the same four-step cycle:
+
+```
+  Edit  →  Stage  →  Commit  →  Push
+    |         |          |          |
+  Make     Select     Record     Upload
+  changes  changes    snapshot   to GitHub
+  to files for save   locally    
+```
+
+You will repeat this cycle hundreds of times. It becomes muscle memory.
+
+
+# The Three Areas of Git
+
+Git manages your files across three areas. Understanding this model is the key
+to understanding every Git command:
+
+```
+ Working Directory      Staging Area (Index)       Repository (History)
+ ─────────────────      ────────────────────       ────────────────────
+ Your actual files      Changes selected for       Permanent record of
+ on disk — what         the next commit            all committed snapshots
+ you edit
+
+        ──── git add ────>       ──── git commit ────>
+        <── git restore ──       <── git reset ──────
+```
+
+- **Working Directory:** The files you see and edit. Any file you modify shows
+  up here as "changed."
+- **Staging Area:** A holding zone where you select which changes go into the
+  next commit. This is what makes Git powerful — you don't have to commit
+  everything at once.
+- **Repository:** The permanent history. Once committed, a snapshot is
+  (essentially) permanent and can always be retrieved.
+
+
+# `git status` — Your Most Important Command
+
+Run `git status` constantly. It tells you exactly what state your files are in.
+
+**Try it now in the Terminal:**
+
+```bash
+git status
+```
+
+The output tells you:
+
+- What branch you're on
+- Whether you're up to date with GitHub
+- Which files are **staged** (green = ready to commit)
+- Which files are **modified but not staged** (red = changed but not selected)
+- Which files are **untracked** (red = new files Git doesn't know about yet)
+
+### Reading `git status` output
+
+```
+On branch main
+Your branch is up to date with 'origin/main'.
+
+Changes to be committed:                    ← GREEN: staged
+  modified:   README.md
+
+Changes not staged for commit:              ← RED: changed but not staged
+  modified:   analysis.R
+
+Untracked files:                            ← RED: brand new files
+  new_script.R
+```
+
+
+# Staging: Why Not Just Commit Everything?
+
+Staging lets you craft **focused, meaningful commits** — even when you've
+changed many files.
+
+## Scenario
+
+You've been working for an hour and changed 5 files:
+
+1. Fixed a bug in the analysis script
+2. Added a new figure
+3. Updated the README
+4. Cleaned up old commented-out code
+5. Started (but didn't finish) a new model
+
+### Without staging (bad)
+
+```bash
+git add .
+git commit -m "updated a bunch of stuff"
+# One giant commit with unrelated changes — impossible to review or revert
+```
+
+### With staging (good)
+
+```bash
+# Commit 1: the bug fix
+git add analysis.R
+git commit -m "Fix p-value calculation error in Table 2"
+
+# Commit 2: the figure
+git add R/03_visualize.R output/figures/fig3.png
+git commit -m "Add Figure 3 dose-response curve"
+
+# Commit 3: the README
+git add README.md
+git commit -m "Update methods description in README"
+
+# DON'T commit the unfinished model yet — leave it for later
+```
+
+Three clean, reviewable, revertable commits instead of one messy blob.
+
+
+# Stage & Commit: The RStudio GUI Method
+
+1. **Check the Staged checkbox** in the Git pane next to files you want to
+   include
+2. Click **"Commit"** — opens the Review Changes window with a diff view
+3. **Write a commit message** in the text box
+4. Click the **"Commit"** button — Git records the snapshot
+5. Click **"Push"** (↑ arrow) — uploads to GitHub
+
+> When prompted for credentials, enter your GitHub **username** and your
+> **PAT** (not your GitHub password).
+
+
+# Stage & Commit: The Terminal Method
+
+```bash
+# Check what's changed
+git status
+
+# Stage specific files
+git add analysis.R data/cleaned_data.csv
+
+# Or stage everything (use with caution)
+git add .
+
+# Commit with a message
+git commit -m "Add dose-response analysis for PFAS data"
+
+# Push to GitHub
+git push
+```
+
+
+# `git diff` — See Exactly What Changed
+
+Before committing, review your changes line by line:
+
+```bash
+git diff                    # Show all unstaged changes
+git diff analysis.R         # Show changes in one file
+git diff --staged           # Show what's staged (about to be committed)
+```
+
+### Reading diff output
+
+```
+@@ -12,7 +12,8 @@ library(tidyverse)
+
+ # Fit the model
+-model <- lm(outcome ~ dose, data = df)
++model <- lm(outcome ~ dose + age + sex, data = df)
++# Adjusted for key confounders per reviewer feedback
+ summary(model)
+```
+
+- **Red (`-`)** = removed line
+- **Green (`+`)** = added line
+- **White** = unchanged context
+
+You can also see diffs in the RStudio GUI: click **"Diff"** in the Git pane,
+or click a filename to open the diff viewer.
+
+
+# Writing Good Commit Messages
+
+Your commit messages are documentation for your future self and your
+collaborators. They answer: **what changed and why?**
+
+## Bad commit messages
+
+```
+"update"
+"fix stuff"  
+"asdfghjkl"
+"changes"
+"final version"
+"misc"
+```
+
+## Good commit messages
+
+```
+"Add PFAS dose-response model"
+"Fix p-value calculation in Figure 3"
+"Remove hardcoded file paths"
+"Add methods section to README"
+"Filter outliers in PM2.5 data"
+"Adjust for BMI confounding"
+```
+
+## The Rule
+
+Complete the sentence: **"This commit will..."**
+
+- "This commit will **add PFAS dose-response model**" ✓
+- "This commit will **update**" ✗ (update what? why?)
+
+## Anatomy of a Great Commit Message
+
+```
+Adjust dose-response model for age and BMI confounders
+
+Reviewer 2 requested adjustment for potential confounders
+in the PFAS-cholesterol analysis. Added age and BMI to
+the linear model in analysis/03_regression.R.
+
+Changes:
+- Added age (continuous) and BMI (continuous) as covariates
+- Updated Table 2 to show adjusted estimates
+- R-squared improved from 0.12 to 0.31
+
+Closes #7
+```
+
+- **First line:** Subject — imperative mood, under 50 characters
+- **Blank line** separates subject from body
+- **Body:** Explains why, not just what
+- **"Closes #7":** Automatically closes GitHub issue #7 when merged
+
+
+# Viewing History: `git log`
+
+```bash
+git log --oneline              # Compact one-line-per-commit view
+git log --oneline -5           # Last 5 commits only
+git log --stat                 # Show which files changed per commit
+git log --author="Smith"       # Commits by a specific person
+git log -- analysis.R          # Commits touching a specific file
+```
+
+### Example output
+
+```
+a3f2d1c Adjust model for age and BMI confounders
+b7e4a92 Add Figure 3 dose-response curve
+c1d8f3e Fix p-value calculation error
+d9a2b7f Import cleaned PFAS biomonitoring data
+e5c1d4a Initial commit with project structure
+```
+
+Each commit has a unique **hash** (like `a3f2d1c`) that you can use to
+reference it.
+
+> **In the RStudio GUI:** Click the clock icon (⏱) in the Git pane to see the
+> visual commit history.
+
+
+# Undoing Mistakes
+
+Git's safety net is one of its biggest advantages. Here are the most common
+"undo" operations:
+
+## Unstage a file (remove from staging, keep changes)
+
+```bash
+git restore --staged filename.R
+```
+
+## Discard changes to a file (revert to last commit)
+
+```bash
+git restore filename.R
+# ⚠️ DESTRUCTIVE — your changes are gone
+```
+
+## Undo the last commit (keep the changes staged)
+
+```bash
+git reset --soft HEAD~1
+```
+
+## View an old version of a file
+
+```bash
+git show HEAD~2:analysis.R    # 2 commits ago
+git show a3f2d1c:analysis.R   # Specific commit by hash
+```
+
+## Fix the last commit message
+
+```bash
+git commit --amend
+# Opens an editor to change the message (only works before pushing)
+```
+
+
+# `git stash` — Save Work Temporarily
+
+Need to switch branches but have uncommitted changes? **Stash** saves your
+work-in-progress without committing.
+
+```bash
+# Save current uncommitted work
+git stash push -m "WIP: new exposure model"
+
+# Switch branches, do other work...
+git checkout main
+
+# Come back and restore your work
+git checkout feature-branch
+git stash pop                  # Applies and removes from stash
+```
+
+Other stash commands:
+
+```bash
+git stash list                 # View all stashes
+git stash drop                 # Delete the most recent stash
+git stash apply                # Apply without removing from stash
+```
+
+
+# .gitignore Preview
+
+Before committing files, set up `.gitignore` to exclude things that don't
+belong in version control:
+
+```
+# R workspace & history
+.RData
+.Rhistory
+.Rproj.user/
+
+# Large data files
+data/raw/*.csv
+*.rds
+
+# Sensitive info
+.Renviron
+credentials/
+
+# Regeneratable output
+output/figures/*.png
+```
+
+When you created the repo with GitHub's R template, many of these were already
+added for you. We'll cover `.gitignore` in detail in Module 6.
+
+
+# Exercise 1: Your First Commit Cycle {.unnumbered}
+
+**Time: 10 minutes**
+
+1. In Posit Cloud, create a new R script: **File → New File → R Script**
+2. Write 3–5 lines of R code:
+
+```{r exercise1-example, eval=FALSE}
+# My first tracked script
+library(datasets)
+data(iris)
+summary(iris$Sepal.Length)
+hist(iris$Sepal.Length, main = "Sepal Length Distribution",
+     col = "steelblue", xlab = "Length (cm)")
+```
+
+3. Save it as `my_first_script.R`
+4. In the **Terminal**: `git status` — see it listed as untracked
+5. In the **Git pane**: check the **Staged** box next to `my_first_script.R`
+6. Click **Commit** → write message: `"Add first practice script"` → **Commit**
+7. Click **Push** (↑) → enter username + PAT when prompted
+8. Go to your GitHub repo in a browser — confirm the file appeared!
+
+
+# Exercise 2: Modify, Diff, and Commit Again {.unnumbered}
+
+**Time: 8 minutes**
+
+1. Open `my_first_script.R` and **add 3 more lines** of code:
+
+```{r exercise2-additions, eval=FALSE}
+# Added: summary statistics
+cat("Mean sepal length:", mean(iris$Sepal.Length), "\n")
+cat("SD:", sd(iris$Sepal.Length), "\n")
+cat("Number of species:", length(unique(iris$Species)), "\n")
+```
+
+2. Save the file
+3. In the Terminal: `git diff my_first_script.R` — see the green `+` lines
+4. In the Git pane: click the filename to see the diff view
+5. Stage the file (check the box)
+6. Commit with message: `"Expand script with summary statistics"`
+7. Push to GitHub
+8. On GitHub: click the file → click **"History"** → see both commits
+9. **Bonus:** In the Terminal, try `git log --oneline`
+
+---
+
+**Time for a break! Next up → `04_branching.Rmd`**

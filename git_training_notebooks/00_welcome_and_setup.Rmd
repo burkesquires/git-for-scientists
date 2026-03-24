@@ -1,0 +1,135 @@
+---
+title: "Git & GitHub for Scientists — Welcome & Setup"
+subtitle: "NIEHS 3-Hour Workshop on Posit Cloud"
+author: "NIEHS Training"
+date: "`r Sys.Date()`"
+output:
+  html_document:
+    theme: flatly
+    toc: true
+    toc_float: true
+    toc_depth: 3
+    number_sections: true
+    code_folding: show
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, message = FALSE, warning = FALSE)
+```
+
+# Welcome! {.unnumbered}
+
+Welcome to **Git & GitHub for Scientists**, a hands-on workshop for researchers
+at the National Institute of Environmental Health Sciences (NIEHS).
+
+By the end of this workshop you will be able to:
+
+- Track every change to your analysis code with Git
+- Collaborate with colleagues through GitHub pull requests and issues
+- Create branches to safely experiment without breaking working code
+- Write commit messages that document your scientific reasoning
+- Keep sensitive data out of version control
+- Create citable code releases with DOIs via Zenodo
+
+## Workshop Agenda
+
+| Module | Topic | Time |
+|--------|-------|------|
+| 0 | Welcome & Setup (this notebook) | 10 min |
+| 1 | Why Version Control for Science? | 20 min |
+| 2 | Setting Up: GitHub, PAT, & Posit Cloud | 25 min |
+| 3 | The Core Git Workflow | 40 min |
+| — | Break | 10 min |
+| 4 | Branching & Collaboration | 30 min |
+| 5 | GitHub for Scientific Teams | 25 min |
+| 6 | Best Practices & .gitignore | 15 min |
+| — | Capstone Exercise | 15 min |
+
+
+# Prerequisites Checklist
+
+Please confirm you have the following ready before we begin:
+
+```{r checklist, echo=FALSE, results='asis'}
+items <- c(
+  "A free **GitHub** account — [github.com](https://github.com)",
+  "A free **Posit Cloud** account — [posit.cloud](https://posit.cloud)",
+  "A **modern web browser** (Chrome, Firefox, or Edge)",
+  "Your **NIEHS email** address handy"
+)
+cat(paste0("- [ ] ", items, "\n"))
+```
+
+> **No prior Git experience is needed.** If you have used R and RStudio before,
+> you have all the background necessary.
+
+
+# How to Use These Notebooks
+
+Each notebook in this workshop is an R Markdown document. You are learning
+about Git *while using R Markdown* — two powerful reproducibility tools at once.
+
+**Two ways to work through the material:**
+
+1. **Read along** as the instructor presents the slides
+2. **Run the exercises** by typing Git commands in the **Terminal** tab
+   (bottom-left pane → Terminal, NOT the Console)
+
+## Terminal vs. Console — Critical Distinction
+
+This is the single most common source of confusion for beginners:
+ 
+| | **Terminal** | **Console** |
+|---|---|---|
+| Prompt | `$` | `>` |
+| Runs | Bash / shell commands | R code |
+| Used for | **Git commands** | Data analysis |
+| Access | Bottom-left → Terminal tab | Bottom-left → Console tab |
+
+**If you type `git status` in the Console, you'll get an error.** All Git
+commands go in the Terminal.
+
+```{r wrong-tab, eval=FALSE}
+# THIS DOES NOT WORK — this is R, not the shell:
+git status
+#> Error: object 'git' not found
+
+# Git commands go in the TERMINAL tab, not here!
+```
+
+
+# Verify Your Environment
+
+Run this chunk to confirm R is working (this runs in the Console, which is
+fine for R code):
+
+```{r verify-r}
+cat("R version:", R.version.string, "\n")
+cat("Working directory:", getwd(), "\n")
+cat("\n✓ R is working. Now let's check Git...\n")
+```
+
+Now switch to the **Terminal** tab and type these commands to verify Git:
+
+```bash
+# Type each of these in the Terminal (not here!)
+git --version
+git config --global --list
+```
+
+You should see a Git version number (2.x or higher). If `git config` shows
+nothing, that's fine — we'll set it up in Module 2.
+
+
+# About These Training Materials
+
+These notebooks are designed to be used alongside the slide deck. The slides
+provide the visual explanations; the notebooks provide the hands-on exercises
+and reference material you can return to later.
+
+All examples use NIEHS-relevant scenarios: PFAS biomonitoring, PM₂.₅ exposure
+analysis, environmental health cohort studies, and dose-response modeling.
+
+---
+
+**Ready? Let's begin → open `01_why_version_control.Rmd`**

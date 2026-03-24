@@ -1,0 +1,212 @@
+---
+title: "Module 2: Setting Up GitHub, PAT, & Posit Cloud"
+subtitle: "Follow Along Step by Step"
+author: "NIEHS Training"
+date: "`r Sys.Date()`"
+output:
+  html_document:
+    theme: flatly
+    toc: true
+    toc_float: true
+    toc_depth: 3
+    number_sections: true
+    code_folding: show
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, message = FALSE, warning = FALSE)
+```
+
+# Step 1: Create a GitHub Account
+
+If you don't already have one:
+
+1. Go to [github.com](https://github.com) and click **"Sign Up"**
+2. Use your **NIEHS email** — this gives institutional recognition
+3. Choose a **professional username** (e.g., `jsmith-niehs`)
+4. Complete email verification
+5. Skip the personalization steps for now
+
+> **Tip:** NIH employees may qualify for a free GitHub Education/Research plan,
+> which includes unlimited private repos, CI minutes, and Copilot access.
+
+
+# Step 1b: Create Your First Repository
+
+1. Click the green **"New"** button (or go to [github.com/new](https://github.com/new))
+2. **Repository name:** `git-workshop` (short, lowercase, hyphens not spaces)
+3. **Description:** "Practice repo for NIEHS Git training"
+4. **Visibility:** Private (you can make it public later)
+5. **Check** "Add a README file"
+6. **Add .gitignore:** select **"R"** from the dropdown
+7. **License:** skip for now (we'll cover licensing later)
+8. Click **"Create repository"**
+
+You now have a repository with a README.md and an R-specific .gitignore!
+
+
+# Step 2: Create a Personal Access Token (PAT)
+
+GitHub no longer accepts passwords for Git operations. You need a Personal
+Access Token (PAT) instead.
+
+## What is a PAT?
+
+A PAT is a long string of characters that acts as your password when Git talks
+to GitHub. It's more secure than a password because:
+
+- You control exactly what permissions it has (scopes)
+- You set an expiration date
+- You can revoke it anytime without changing your GitHub password
+
+## Creating the PAT
+
+1. **GitHub → Settings → Developer settings → Personal access tokens → Tokens (classic)**
+   - Quick link: [github.com/settings/tokens](https://github.com/settings/tokens)
+2. Click **"Generate new token"** → **"Generate new token (classic)"**
+3. **Note:** `Posit Cloud access`
+4. **Expiration:** 90 days (or custom — you can always regenerate)
+5. **Scopes:** check **"repo"** (full control of private repositories)
+6. Click **"Generate token"**
+
+**⚠️ COPY THE TOKEN NOW — you will never see it again after leaving this page!**
+
+## Understanding PAT Scopes
+
+| Scope | Description | Need it? |
+|-------|-------------|----------|
+| **repo** | Read/write access to repositories | **Yes** |
+| workflow | Update GitHub Actions workflows | No |
+| write:packages | Upload packages to GitHub Packages | No |
+| read:org | Read organization membership | No |
+| gist | Create gists (code snippets) | No |
+
+For this workshop, **"repo" is the only scope you need.** Principle of least
+privilege: only grant what you actually use.
+
+## Where to Store Your PAT
+
+- **Password manager** (1Password, Bitwarden, etc.) — recommended
+- **A secure note** — acceptable for today
+- **NOT** in a file in your project, NOT in your code, NOT in a sticky note
+
+<div style="padding: 12px; background-color: #FEE2E2; border-left: 4px solid #DC2626; margin: 16px 0;">
+**Warning:** Your PAT is as powerful as your password. If someone gets your PAT,
+they can access your repositories. Treat it like a password.
+</div>
+
+
+# Step 3: Create a Posit Cloud Project from GitHub
+
+1. Log in at [posit.cloud](https://posit.cloud)
+2. Click **"New Project"** dropdown → **"New Project from Git Repository"**
+3. Paste the **HTTPS URL** from your GitHub repo
+   - Go to your repo on GitHub → click the green **"Code"** button → copy the HTTPS URL
+   - It looks like: `https://github.com/yourusername/git-workshop.git`
+   - ⚠️ **Use HTTPS, not SSH** — SSH requires extra setup on Posit Cloud
+4. Wait for the project to build (30–60 seconds)
+5. You should see your files (README.md, .gitignore) in the Files pane
+
+## HTTPS vs. SSH on Posit Cloud
+
+| | **HTTPS + PAT** ✓ | **SSH Keys** |
+|---|---|---|
+| Setup | Works out of the box | Requires key pair generation |
+| URL format | `https://github.com/...` | `git@github.com:...` |
+| Authentication | Username + PAT when prompted | SSH key exchange |
+| Credential cache | 12 hours on Posit Cloud | Permanent until key revoked |
+| From "New Project" | Yes | No (HTTPS only for cloning) |
+
+**We use HTTPS + PAT for this workshop.** It's simpler and works immediately.
+
+
+# Step 4: Configure Your Git Identity
+
+Open the **Terminal** tab (bottom-left pane → Terminal) and type:
+
+```bash
+git config --global user.name "Your Name"
+git config --global user.email "you@niehs.nih.gov"
+```
+
+Verify with:
+
+```bash
+git config --global --list
+```
+
+You should see your name and email listed.
+
+### Why this matters
+
+Every commit you make is labeled with your name and email. This is how Git
+(and your collaborators) know who made each change. Use your real name and
+your NIEHS email so your contributions are properly attributed.
+
+### Posit Cloud specifics
+
+- The **credential cache** is set to 12 hours by default — you typically enter
+  your PAT once per session
+- When prompted for a **"password"**, enter your **PAT** — not your GitHub password
+- If you linked your GitHub account to Posit Cloud during signup, your
+  name/email may already be configured
+
+# Alternative: Enable Git on an Existing Project
+
+If you already have a Posit Cloud project without Git:
+
+**Via the RStudio menu:**
+
+```
+Tools → Version Control → Project Setup → Version Control System → Git → Yes
+```
+
+<div style="padding: 12px; background-color: #FEE2E2; border-left: 4px solid #DC2626; margin: 16px 0;">
+**Important:** `usethis::use_git()` does **NOT** work on Posit Cloud. You must
+use the menu method above.
+</div>
+
+Then connect to GitHub via the Terminal:
+
+```bash
+git remote add origin https://github.com/yourusername/repo-name.git
+git push -u origin main
+# Enter username + PAT when prompted
+```
+
+
+# Exercise 0: Verify Your Setup {.unnumbered}
+
+Run through this checklist in the **Terminal** (not the Console):
+
+```bash
+# 1. Can you see the Git tab in the upper-right pane? (Yes/No)
+
+# 2. Check your identity
+git config --global user.name
+git config --global user.email
+
+# 3. Check repo status
+git status
+# Should say: "On branch main" and "nothing to commit"
+
+# 4. Check remote connection
+git remote -v
+# Should show your GitHub URL for "origin"
+
+# 5. Check Git version
+git --version
+```
+
+If anything looks wrong, raise your hand — we'll troubleshoot together.
+
+**Common issues:**
+
+- "Not a git repository" → You may have opened the Console instead of the
+  Terminal, or the project wasn't created from a Git repo
+- No user.name/email → Run the `git config` commands from Step 4
+- No remote → Run `git remote add origin <your-URL>`
+
+---
+
+**Setup complete! Next up → `03_core_git_workflow.Rmd`**

@@ -1,0 +1,165 @@
+---
+title: "Module 1: Why Version Control for Science?"
+subtitle: "The Problem, the Solution, and Why It Matters at NIEHS"
+author: "NIEHS Training"
+date: "`r Sys.Date()`"
+output:
+  html_document:
+    theme: flatly
+    toc: true
+    toc_float: true
+    toc_depth: 3
+    number_sections: true
+    code_folding: show
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, message = FALSE, warning = FALSE)
+```
+
+# The Problem: Sound Familiar?
+
+How many of these have you seen in a project folder?
+
+```
+analysis.R
+analysis_v2.R
+analysis_v2_final.R
+analysis_v2_final_REAL.R
+analysis_v2_final_REAL_use_this.R
+analysis_v2_final_REAL_use_this_FIXED.R
+```
+
+This is the "file name versioning" approach, and it fails in predictable ways:
+
+- Which file is actually current?
+- What changed between `v2` and `v2_final`?
+- Who made the changes and why?
+- Can you get back to last Tuesday's version?
+
+**Version control eliminates this chaos entirely.**
+
+
+# When Things Go Wrong Without Version Control
+
+These are real scenarios (anonymized) from research settings:
+
+### Scenario 1: The accidental deletion
+A graduate student accidentally deleted 6 months of analysis code. No backup,
+no history — they had to reconstruct from memory and old email attachments.
+
+### Scenario 2: The overwrite
+Two postdocs edited the same R script simultaneously on a shared drive. One
+saved and overwrote the other's changes. Three days of work lost.
+
+### Scenario 3: The reviewer question
+A reviewer asked "how did you handle outliers in the 2nd revision?" The team
+couldn't trace which version of the code produced which results.
+
+### Scenario 4: The data leak
+Sensitive patient identifiers were emailed in a data file. No audit trail of
+who had access or when it was shared. Version control would show exactly when
+the file was added and by whom.
+
+> **Every one of these is preventable with Git.**
+
+
+# What Git Gives You
+
+| Benefit | What it means |
+|---------|---------------|
+| **Complete history** | Every change is recorded with who, what, when, and why — you can always go back |
+| **Fearless experimentation** | Try new analyses on branches without risking your working code |
+| **Reproducibility** | Collaborators and reviewers can see exactly how results were produced |
+| **Collaboration** | Multiple scientists work on the same project without overwriting each other |
+
+
+# Git vs. GitHub — They're Different Things
+
+This is one of the most common points of confusion for beginners:
+
+## Git
+
+- The **version control software** that runs on your computer
+- Tracks changes to files locally
+- Works offline — no internet needed
+- Free and open source, created in 2005 by Linus Torvalds (creator of Linux)
+- On Posit Cloud, Git is pre-installed
+
+## GitHub
+
+- A **cloud hosting platform** for Git repositories
+- Stores repos online for sharing
+- Adds collaboration features: issues, pull requests, wikis, project boards
+- Free for public and private repositories
+- Owned by Microsoft since 2018
+- Alternatives exist: GitLab, Bitbucket
+
+
+# Comparing Approaches
+
+How does Git compare to other ways of managing code?
+
+```{r comparison-table, echo=FALSE}
+comparison <- data.frame(
+  Approach = c("Manual copies (analysis_v2_final.R)", 
+               "Shared drive / Dropbox",
+               "Email attachments",
+               "Google Drive / OneDrive", 
+               "Git + GitHub"),
+  History = c("None", "Partial", "None", "Auto-save", "Full history"),
+  Branching = c("None", "None", "None", "Limited", "Branches"),
+  Collaboration = c("None", "Sync only", "Copies", "Comments", "PRs, Issues"),
+  Verdict = c("Fragile", "Risky", "Chaotic", "No code tools", "Robust")
+)
+
+knitr::kable(comparison, align = "lcccc") |>
+  kableExtra::kable_styling(bootstrap_options = c("striped", "hover"), 
+                            full_width = FALSE)
+```
+
+
+# Where Git Fits in the Research Lifecycle
+
+```
+  Design     Collect     Write      Analyze &    Write        Publish &
+  Study   →  Data     →  Code    →  Iterate   →  Manuscript → Archive
+                         |__________________________________|
+                                Git + GitHub active here
+```
+
+- Git tracks every change from the moment you start coding through publication
+- The code that generated your published results should be traceable to a
+  specific commit
+- Many journals now require code and data availability statements — GitHub
+  makes this easy
+
+
+# Git Supports NIEHS FAIR+ Principles
+
+The NIEHS 2025–2029 Strategic Plan emphasizes FAIR+ data and reproducibility.
+Version control is foundational to both.
+
+| Principle | How Git helps |
+|-----------|---------------|
+| **F**indable | Code in a public GitHub repository with DOI via Zenodo |
+| **A**ccessible | Anyone can clone, inspect, and run your analysis |
+| **I**nteroperable | Standard project structure works across platforms and tools |
+| **R**eusable | Clear commit history documents every decision and change |
+
+
+# Discussion Questions {.unnumbered}
+
+Think about your own work:
+
+1. Have you ever lost code or accidentally overwritten a colleague's changes?
+2. If a reviewer asked you to show the exact code that produced Figure 3 in
+   your last paper, could you find it?
+3. How do you currently share code with collaborators?
+4. What data security concerns do you have about putting code online?
+
+We'll address all of these throughout the workshop.
+
+---
+
+**Next up → `02_setup.Rmd` — setting up GitHub, your PAT, and Posit Cloud**

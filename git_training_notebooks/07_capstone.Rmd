@@ -1,0 +1,244 @@
+---
+title: "Capstone Exercise: Full Git Workflow"
+subtitle: "Put Everything Together in 15 Minutes"
+author: "YOUR NAME HERE"
+date: "`r Sys.Date()`"
+output:
+  html_document:
+    theme: flatly
+    toc: true
+    toc_float: true
+    toc_depth: 2
+    number_sections: true
+    code_folding: show
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, message = FALSE, warning = FALSE)
+```
+
+# Overview {.unnumbered}
+
+This capstone exercise walks you through a complete Git workflow that uses
+every skill from the workshop. You will:
+
+1. Create a branch
+2. Write an analysis script
+3. Stage and commit with a meaningful message
+4. Push the branch to GitHub
+5. Open and merge a Pull Request
+6. Create and close a GitHub Issue
+7. Sync your local repo
+
+**Time: 15 minutes.** Work at your own pace. The steps below are detailed —
+follow them in order.
+
+---
+
+# Step 1: Create a Branch
+
+In the **Terminal:**
+
+```bash
+git checkout -b feature/capstone-analysis
+```
+
+Verify you're on the new branch:
+
+```bash
+git branch
+# Should show * feature/capstone-analysis
+```
+
+
+# Step 2: Write an Analysis Script
+
+Create a new file called `capstone_analysis.R` with the following content.
+You can type it manually or copy from this notebook:
+
+```{r capstone-code, eval=FALSE}
+# ==============================================================
+# Capstone Analysis: Environmental Exposure Summary
+# Author: [YOUR NAME]
+# Date: [TODAY'S DATE]
+# Description: Quick exploration of simulated exposure data
+# ==============================================================
+
+library(ggplot2)
+
+# --- Simulated biomonitoring data ---
+set.seed(42)
+n <- 100
+exposure_data <- data.frame(
+  participant_id = paste0("NIEHS-", sprintf("%04d", 1:n)),
+  age = round(rnorm(n, mean = 48, sd = 13)),
+  sex = sample(c("Female", "Male"), n, replace = TRUE),
+  pfoa_ng_ml = round(rlnorm(n, meanlog = 0.8, sdlog = 0.9), 2),
+  site = sample(c("RTP", "Durham", "Chapel Hill"), n, replace = TRUE)
+)
+
+# --- Summary statistics ---
+cat("=== PFOA Serum Concentrations ===\n")
+cat("N:", nrow(exposure_data), "\n")
+cat("Mean:", round(mean(exposure_data$pfoa_ng_ml), 2), "ng/mL\n")
+cat("Median:", round(median(exposure_data$pfoa_ng_ml), 2), "ng/mL\n")
+cat("Range:", round(range(exposure_data$pfoa_ng_ml), 2), "ng/mL\n")
+
+# --- Visualization ---
+p <- ggplot(exposure_data, aes(x = pfoa_ng_ml, fill = sex)) +
+  geom_histogram(alpha = 0.7, bins = 25, position = "identity") +
+  scale_fill_manual(values = c("Female" = "#0D9488", "Male" = "#6366F1")) +
+  scale_x_log10() +
+  labs(
+    title = "Distribution of Serum PFOA Concentrations",
+    subtitle = paste("N =", n, "participants"),
+    x = "PFOA (ng/mL, log scale)",
+    y = "Count",
+    fill = "Sex"
+  ) +
+  theme_minimal()
+
+print(p)
+
+cat("\nAnalysis complete.\n")
+```
+
+Save the file as `capstone_analysis.R`.
+
+
+# Step 3: Check Status and Diff
+
+In the Terminal:
+
+```bash
+# See the new untracked file
+git status
+
+# If you also modified any existing files:
+git diff
+```
+
+
+# Step 4: Stage and Commit
+
+```bash
+# Stage the new file
+git add capstone_analysis.R
+
+# Commit with a descriptive message
+git commit -m "Add capstone analysis of simulated PFOA biomonitoring data"
+```
+
+
+# Step 5: Push the Branch to GitHub
+
+```bash
+git push -u origin feature/capstone-analysis
+```
+
+Enter your username and PAT when prompted.
+
+
+# Step 6: Open a Pull Request on GitHub
+
+1. Go to your repository on GitHub.com
+2. You should see a yellow banner: **"feature/capstone-analysis had recent
+   pushes"** → click **"Compare & pull request"**
+3. Fill in the PR description:
+
+```
+## What this PR does
+Adds a capstone analysis script that explores simulated
+PFOA biomonitoring data with summary statistics and a
+histogram stratified by sex.
+
+## Skills demonstrated
+- Branching
+- Staging and committing
+- Writing descriptive commit messages
+- Pull request workflow
+```
+
+4. Click **"Create pull request"**
+
+
+# Step 7: Merge the Pull Request
+
+1. On the PR page, click **"Merge pull request"**
+2. Click **"Confirm merge"**
+3. Click **"Delete branch"** (cleanup)
+
+
+# Step 8: Sync Your Local Repo
+
+Back in the Posit Cloud Terminal:
+
+```bash
+git checkout main
+git pull
+```
+
+Your `capstone_analysis.R` should now be on main. Verify:
+
+```bash
+ls -la capstone_analysis.R
+git log --oneline -3
+```
+
+
+# Step 9: Create and Close an Issue
+
+1. On GitHub: **Repo → Issues → New issue**
+2. Title: `"Add boxplot of PFOA by site"`
+3. Description: `"The capstone analysis should include a boxplot comparing PFOA concentrations across the three monitoring sites."`
+4. Click **"Submit new issue"** — note the issue number (probably `#1`)
+
+Now close it with a commit:
+
+```bash
+# Make sure you're on main
+git checkout main
+
+# Add a line to capstone_analysis.R:
+echo '
+# Boxplot by site
+p2 <- ggplot(exposure_data, aes(x = site, y = pfoa_ng_ml, fill = site)) +
+  geom_boxplot(alpha = 0.7) +
+  scale_y_log10() +
+  labs(title = "PFOA by Monitoring Site", y = "PFOA (ng/mL, log scale)") +
+  theme_minimal() +
+  theme(legend.position = "none")
+print(p2)
+' >> capstone_analysis.R
+
+# Stage and commit — closes the issue!
+git add capstone_analysis.R
+git commit -m "Add PFOA boxplot by site, closes #1"
+git push
+```
+
+Go to GitHub → Issues → verify that issue #1 is now closed!
+
+
+# Congratulations! {.unnumbered}
+
+<div style="padding: 15px; background-color: #F0FDF4; border-left: 4px solid #0D9488; margin-top: 20px;">
+
+If you completed this capstone, you have practiced:
+
+- ✅ Creating and switching branches
+- ✅ Writing and saving R scripts
+- ✅ Staging and committing with meaningful messages
+- ✅ Pushing branches to GitHub
+- ✅ Opening and merging Pull Requests
+- ✅ Creating GitHub Issues
+- ✅ Closing Issues from commit messages
+- ✅ Syncing your local repo with `git pull`
+- ✅ Deleting merged branches
+
+**You are now equipped to use Git and GitHub in your daily research work.**
+
+The best way to learn Git is to **use it every day** — start with your next
+project, even if it's solo work.
+
+</div>

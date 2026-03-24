@@ -1,0 +1,303 @@
+---
+title: "Module 6: Best Practices & .gitignore"
+subtitle: "Security, Commit Hygiene, and Keeping Your Repo Clean"
+author: "NIEHS Training"
+date: "`r Sys.Date()`"
+output:
+  html_document:
+    theme: flatly
+    toc: true
+    toc_float: true
+    toc_depth: 3
+    number_sections: true
+    code_folding: show
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, message = FALSE, warning = FALSE)
+```
+
+# .gitignore: What NOT to Track
+
+A `.gitignore` file tells Git which files to **automatically exclude** from
+version control. It lives in the root of your repository.
+
+## Essential .gitignore for R Projects
+
+```
+# R workspace and history — these are user-specific
+.RData
+.Rhistory
+.Rproj.user/
+
+# Large data files — too big for Git (>50 MB)
+data/raw/*.csv
+data/raw/*.xlsx
+*.rds
+*.rda
+
+# Sensitive information — NEVER commit these
+.Renviron
+credentials/
+*.pem
+*.key
+
+# Output files that can be regenerated
+output/figures/*.png
+output/figures/*.tiff
+output/tables/*.csv
+
+# OS-specific junk
+.DS_Store
+Thumbs.db
+
+# Temporary files
+*~
+*.swp
+```
+
+> When you created the repo with GitHub's **R .gitignore template**, many of
+> these patterns were already included. Always review and customize.
+
+
+# .gitignore Pattern Syntax
+
+```{r pattern-table, echo=FALSE}
+patterns <- data.frame(
+  Pattern = c("*.csv", "data/*.csv", "data/**/*.csv", "!data/reference.csv",
+              "output/", ".Renviron", "*.log", "temp_*"),
+  Effect = c("Ignore all CSV files everywhere",
+             "Ignore CSVs in the data/ folder only",
+             "Ignore CSVs in data/ and all subfolders",
+             "Exception: DO track this specific CSV",
+             "Ignore the entire output directory",
+             "Ignore this specific file",
+             "Ignore all log files",
+             "Ignore files starting with temp_")
+)
+knitr::kable(patterns) |>
+  kableExtra::kable_styling(bootstrap_options = c("striped", "hover"),
+                            full_width = FALSE)
+```
+
+### Key rules
+
+- Patterns are matched from the repo root
+- `*` matches any characters within a filename
+- `**` matches across directories
+- `!` creates an **exception** (override a previous ignore pattern)
+- Order matters — later rules override earlier ones
+- Lines starting with `#` are comments
+- Directories end with `/`
+
+
+## What to Track vs. What to Ignore
+
+**DO track:**
+
+- R scripts (`.R`), R Markdown (`.Rmd`), Quarto (`.qmd`)
+- README.md and documentation
+- `.gitignore` itself
+- Small reference datasets (if not sensitive)
+- Configuration files (`.Rproj`, `renv.lock`)
+- LICENSE file
+
+**DON'T track:**
+
+- Large datasets (>50 MB) — use data repositories instead
+- Passwords, API keys, tokens — use `.Renviron`
+- `.RData` and `.Rhistory` — user-specific, often huge
+- Generated output you can regenerate from code
+- Protected health information (PHI) or personally identifiable data (PII)
+
+
+## The .Renviron Pattern for Secrets
+
+Store API keys and passwords in `.Renviron` (which is gitignored):
+
+```
+# .Renviron file (in your project root)
+API_KEY=your_secret_key_here
+DATABASE_PASSWORD=another_secret
+```
+
+Access in your R code:
+
+```{r renviron-demo, eval=FALSE}
+# In your R script
+my_key <- Sys.getenv("API_KEY")
+```
+
+This keeps secrets out of your code AND out of version control.
+
+
+# Security for Federal Scientists
+
+<div style="padding: 12px; background-color: #FEE2E2; border-left: 4px solid #DC2626; margin: 16px 0;">
+**Critical:** Once data is pushed to GitHub, it is in the repository history —
+**even if you delete the file later.** Removing a file from Git history requires
+rewriting history, which is complex and disruptive.
+</div>
+
+## Security Rules
+
+1. **Never commit sensitive data** — No PII, PHI, API keys, or unpublished
+   confidential data
+2. **Use private repositories** — Free accounts support private repos. Make
+   repos public only when ready for publication
+3. **Use .gitignore proactively** — Add patterns BEFORE creating sensitive
+   files. Prevention is far easier than cleanup
+4. **Use .Renviron for secrets** — Store API keys there (gitignored) and
+   access via `Sys.getenv()` in your scripts
+5. **Check with your ISSO** — Your NIEHS Information System Security Officer
+   can advise on institute-specific policies
+6. **Audit before making public** — Review ALL files and the full commit
+   history before changing repository visibility from private to public
+
+## What if sensitive data was accidentally committed?
+
+1. **Don't panic**, but act quickly
+2. If the repo is private and hasn't been shared, you may be able to rewrite
+   history with `git filter-branch` or the BFG Repo Cleaner
+3. If the repo is public, **assume the data is compromised** — rotate any
+   exposed credentials immediately
+4. Contact your ISSO and follow NIEHS incident response procedures
+5. Consider deleting the repository and recreating it
+
+
+# How Often Should You Commit?
+
+Think of commits as saving a document — but with purpose. Each commit should
+be a **logical unit of work**.
+
+### Too infrequent (bad)
+
+- One commit per week
+- Hundreds of changes mixed together
+- Impossible to review or revert individual changes
+- Defeats the purpose of Git
+
+### Just right (good)
+
+- After each logical change
+- 2–10 commits per work session
+- Each commit has a clear, describable purpose
+- Can be reviewed independently
+
+**Rule of thumb:** If you can't describe the commit in one sentence, it's
+probably too big. When in doubt, commit more often.
+
+
+# Other Best Practices
+
+## Use relative paths, not absolute paths
+
+```{r paths-demo, eval=FALSE}
+# BAD — breaks on anyone else's computer
+data <- read.csv("/Users/jsmith/Desktop/niehs/data/exposure.csv")
+
+# GOOD — works from the project root on any machine
+data <- read.csv("data/processed/exposure.csv")
+
+# BETTER — works even if your working directory changes
+data <- read.csv(here::here("data", "processed", "exposure.csv"))
+```
+
+## Use R Projects (.Rproj)
+
+Always work within an R Project. This:
+
+- Sets the working directory to the project root
+- Makes relative paths work consistently
+- Enables Git integration in the RStudio GUI
+- Keeps your R environment separate from other projects
+
+## Use `renv` for package management
+
+```{r renv-demo, eval=FALSE}
+# Initialize renv in your project
+renv::init()
+
+# After installing packages, take a snapshot
+renv::snapshot()
+
+# A collaborator restores your exact package versions
+renv::restore()
+```
+
+The `renv.lock` file records every package and version. Commit it to Git!
+This ensures anyone can reproduce your environment.
+
+## Write code for humans, not just computers
+
+```{r readable-code, eval=FALSE}
+# BAD
+m<-lm(y~x1+x2+x3,d);s<-summary(m);s$r.squared
+
+# GOOD
+model <- lm(
+  cholesterol ~ pfoa_serum + age + bmi,
+  data = biomarker_data
+)
+model_summary <- summary(model)
+model_summary$r.squared
+```
+
+
+# Quick Reference: Git Commands {.tabset}
+
+## Setup
+
+```bash
+git config --global user.name "Your Name"
+git config --global user.email "you@niehs.nih.gov"
+git config --global --list
+```
+
+## Daily Workflow
+
+```bash
+git status                # What changed?
+git add <file>            # Stage a file
+git add .                 # Stage everything
+git commit -m "message"   # Commit with message
+git push                  # Upload to GitHub
+git pull                  # Download from GitHub
+```
+
+## Branching
+
+```bash
+git checkout -b <name>    # Create & switch to branch
+git checkout main         # Switch to main
+git branch                # List branches
+git merge <branch>        # Merge branch into current
+git branch -d <branch>    # Delete merged branch
+```
+
+## Inspection
+
+```bash
+git log --oneline         # Compact history
+git log --oneline -5      # Last 5 commits
+git diff                  # Unstaged changes
+git diff --staged         # Staged changes
+git show HEAD:file.R      # View old file version
+```
+
+## Undoing
+
+```bash
+git restore --staged f.R  # Unstage a file
+git restore f.R           # Discard changes (destructive!)
+git reset --soft HEAD~1   # Undo last commit (keep changes)
+git stash                 # Save work temporarily
+git stash pop             # Restore stashed work
+git commit --amend        # Fix last commit message
+```
+
+## {.unnumbered}
+
+---
+
+**Next up → `07_capstone.Rmd` — put it all together!**
